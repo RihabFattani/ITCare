@@ -1,0 +1,35 @@
+/* Styles globaux ITCare (le theme Argon est charge avant, via angular.json) */
+@import "theme-advanced.scss";
+@import "theme-extra.scss";
+
+.table-responsive { overflow-x: auto; }
+
+.badge-statut { font-size: .75rem; letter-spacing: .02em; }
+
+/* Notifications (toasts) en haut a droite */
+.itcare-toasts {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2000;
+  width: 22rem;
+  max-width: calc(100vw - 2rem);
+}
+
+.cursor-pointer { cursor: pointer; }
+
+/* Logo rond des clients */
+.client-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #f6f9fc;
+}
+
+.capture-preview {
+  max-width: 100%;
+  max-height: 360px;
+  border-radius: .375rem;
+  border: 1px solid #e9ecef;
+}
