@@ -360,11 +360,9 @@ cd front && npm test
 
 | Fichier | Contenu |
 |---|---|
-| [`API_ITCare.md`](API_ITCare.md) | API détaillées pour Postman et relations JPA |
-| [`JOURNAL_TRAVAIL.md`](JOURNAL_TRAVAIL.md) | Journal de travail |
-| [`TODO.md`](TODO.md) | Tâches à venir (déploiement Docker) |
+
 | `CDC_ITCare_Rihab_Fatteni.pdf` | Cahier des charges |
-| `Guide_ITCare_API.doc` | Guide pour la présentation |
+
 
 ---
 
