@@ -111,9 +111,6 @@ itcare/
 │       ├── layouts/              # AdminLayout, AuthLayout, navbar, sidebar, notifications
 │       ├── pages/                # dashboard, incidents, clients, kanban, calendar, users, account...
 │       └── shared/               # SLA, thème, toasts, utilitaires
-├── API_ITCare.md                 # Liste des API pour Postman
-├── TODO.md                       # Tâches à venir (déploiement Docker)
-└── JOURNAL_TRAVAIL.md            # Journal de travail
 ```
 
 ---
