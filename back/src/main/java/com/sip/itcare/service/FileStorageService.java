@@ -104,6 +104,20 @@ public class FileStorageService {
         }
     }
 
+    /** Vrai si le fichier existe sur le disque (sert a restaurer les fichiers de demo apres un redemarrage). */
+    public boolean exists(FileType type, String filename) {
+        return filename != null && !filename.isBlank() && Files.exists(resolve(type, filename));
+    }
+
+    /** Ecrit des octets sous un nom donne (restauration des fichiers du jeu d'essai). */
+    public void writeBytes(FileType type, String filename, byte[] data) {
+        try {
+            Files.write(resolve(type, filename), data);
+        } catch (IOException e) {
+            throw new IllegalStateException("Impossible d'ecrire le fichier", e);
+        }
+    }
+
     /** RG9 : suppression PHYSIQUE du fichier. Sans effet si le nom est null. */
     public void delete(String filename, FileType type) {
         if (filename == null || filename.isBlank()) {

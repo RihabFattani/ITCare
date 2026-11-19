@@ -1,0 +1,35 @@
+# Blueprint Render : un seul service web (Docker) qui sert l'API et le site Angular.
+# Les valeurs "sync: false" sont saisies dans le tableau de bord Render (jamais dans Git).
+services:
+  - type: web
+    name: itcare
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: APP_BASE_URL
+        sync: false
+      - key: APP_FRONT_URL
+        sync: false
+      - key: SPRING_MAIL_HOST
+        value: smtp.gmail.com
+      - key: SPRING_MAIL_PORT
+        value: "587"
+      - key: SPRING_MAIL_USERNAME
+        sync: false
+      - key: SPRING_MAIL_PASSWORD
+        sync: false
+      - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH
+        value: "true"
+      - key: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
+        value: "true"

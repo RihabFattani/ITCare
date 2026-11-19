@@ -64,7 +64,8 @@ public class SecurityConfig {
                 // tout le reste sur clients / incidents (PUT, PATCH, DELETE, rapport PDF) : Admin
                 .requestMatchers("/api/clients/**", "/api/incidents/**").hasRole("ADMIN")
                 .requestMatchers("/api/files/**").authenticated()
-                .anyRequest().authenticated())
+                .requestMatchers("/api/**").authenticated()   // toute autre route de l'API exige un token
+                .anyRequest().permitAll())                    // fichiers du site Angular (index.html, js, css...)
             .addFilterBefore(new JwtAuthFilter(jwtService, userDetailsService),
                     UsernamePasswordAuthenticationFilter.class);
         return http.build();

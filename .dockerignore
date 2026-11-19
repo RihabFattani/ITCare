@@ -1,0 +1,11 @@
+.git
+.env
+**/node_modules
+front/dist
+front/.angular
+back/target
+back/uploads
+capture postman
+*.doc
+*.pdf
+*.md

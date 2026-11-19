@@ -97,6 +97,53 @@ public class DataLoader implements CommandLineRunner {
                         int client, Statut statut, int heures, boolean capture, boolean rapport) {
     }
 
+    private static final List<Seed> SEEDS = List.of(
+            new Seed("Logiciel de gestion des rendez-vous inaccessible",
+                    "Les secretaires ne peuvent plus ouvrir l'application de rendez-vous : erreur 500 depuis ce matin.",
+                    Priorite.HAUTE, 4, 1, Statut.OUVERT, 30, true, false),
+            new Seed("Application metier inaccessible apres mise a jour",
+                    "Apres la mise a jour de cette nuit, l'application de gestion des comptes affiche une page blanche.",
+                    Priorite.HAUTE, 6, 0, Statut.EN_COURS, 50, true, false),
+            new Seed("Plateforme pedagogique Moodle inaccessible",
+                    "Les enseignants et les eleves ne peuvent plus se connecter a Moodle (timeout).",
+                    Priorite.HAUTE, 3, 2, Statut.RESOLU, 120, false, true),
+            new Seed("Perte d'acces a la base de donnees MySQL",
+                    "Le logiciel de caisse ne se connecte plus au serveur MySQL : Access denied for user.",
+                    Priorite.HAUTE, 5, 3, Statut.OUVERT, 40, true, false),
+            new Seed("Synchronisation Outlook impossible",
+                    "Microsoft Outlook reste bloque sur 'Synchronisation en cours' pour tout le service administratif.",
+                    Priorite.MOYENNE, 2, 4, Statut.EN_COURS, 28, false, false),
+            new Seed("Imprimante reseau hors ligne",
+                    "L'imprimante du guichet 3 apparait hors ligne sur tous les postes.",
+                    Priorite.BASSE, 1, 5, Statut.RESOLU, 200, false, false),
+            new Seed("Windows Server 2019 ne demarre plus apres une coupure electrique",
+                    "Le serveur de fichiers reste bloque sur l'ecran de reparation automatique.",
+                    Priorite.HAUTE, 8, 3, Statut.EN_COURS, 10, true, false),
+            new Seed("Connexion VPN impossible pour les agents en teletravail",
+                    "Le client VPN affiche 'Authentification echouee' pour 5 agents depuis ce matin.",
+                    Priorite.MOYENNE, 3, 0, Statut.OUVERT, 5, false, false),
+            new Seed("Boite aux lettres Outlook pleine",
+                    "Plusieurs enseignants n'ont plus la place de recevoir des emails (quota de 50 Go atteint).",
+                    Priorite.BASSE, 1, 2, Statut.RESOLU, 300, false, false),
+            new Seed("Sauvegarde MySQL nocturne en echec",
+                    "Le script de sauvegarde de la base MySQL echoue depuis deux nuits (disque plein).",
+                    Priorite.MOYENNE, 4, 5, Statut.OUVERT, 26, false, false),
+            new Seed("Lenteur du Wi-Fi dans les salles de classe",
+                    "Le reseau Wi-Fi sature aux heures de cours : debit inferieur a 1 Mbit/s.",
+                    Priorite.MOYENNE, 3, 2, Statut.EN_COURS, 72, false, false),
+            new Seed("Certificat SSL expire sur le portail patient",
+                    "Le navigateur affiche 'Votre connexion n'est pas privee' sur le portail des patients.",
+                    Priorite.HAUTE, 2, 1, Statut.RESOLU, 90, false, true),
+            new Seed("Poste de caisse bloque par Windows Update",
+                    "Le poste de caisse 2 redemarre en boucle sur la mise a jour Windows.",
+                    Priorite.BASSE, 2, 3, Statut.OUVERT, 3, false, false),
+            new Seed("Antivirus desactive sur plusieurs postes",
+                    "La console antivirus signale 8 postes sans protection active dans plusieurs agences.",
+                    Priorite.MOYENNE, 2, 4, Statut.RESOLU, 150, false, false),
+            new Seed("Acces VPN refuse au service comptabilite",
+                    "Le service comptabilite ne peut plus joindre le serveur de fichiers via le VPN.",
+                    Priorite.HAUTE, 3, 5, Statut.EN_COURS, 60, false, false));
+
     @Override
     public void run(String... args) {
         // Les roles doivent toujours exister
@@ -105,6 +152,7 @@ public class DataLoader implements CommandLineRunner {
 
         backfillIncidents(); // echeance, assignation, historique et commentaires des anciens tickets
         refreshDemoClients(); // remplace les anciens clients fictifs par de vrais clients (idempotent)
+        restoreMissingDemoFiles(); // hebergement a disque ephemere : regenere les logos/captures/rapports de demo manquants
 
         if (userRepository.count() > 0) {
             return; // donnees deja presentes
@@ -120,52 +168,7 @@ public class DataLoader implements CommandLineRunner {
             clients.add(clientRepository.save(applyDemo(new Client(), d)));
         }
 
-        List<Seed> seeds = List.of(
-                new Seed("Logiciel de gestion des rendez-vous inaccessible",
-                        "Les secretaires ne peuvent plus ouvrir l'application de rendez-vous : erreur 500 depuis ce matin.",
-                        Priorite.HAUTE, 4, 1, Statut.OUVERT, 30, true, false),
-                new Seed("Application metier inaccessible apres mise a jour",
-                        "Apres la mise a jour de cette nuit, l'application de gestion des comptes affiche une page blanche.",
-                        Priorite.HAUTE, 6, 0, Statut.EN_COURS, 50, true, false),
-                new Seed("Plateforme pedagogique Moodle inaccessible",
-                        "Les enseignants et les eleves ne peuvent plus se connecter a Moodle (timeout).",
-                        Priorite.HAUTE, 3, 2, Statut.RESOLU, 120, false, true),
-                new Seed("Perte d'acces a la base de donnees MySQL",
-                        "Le logiciel de caisse ne se connecte plus au serveur MySQL : Access denied for user.",
-                        Priorite.HAUTE, 5, 3, Statut.OUVERT, 40, true, false),
-                new Seed("Synchronisation Outlook impossible",
-                        "Microsoft Outlook reste bloque sur 'Synchronisation en cours' pour tout le service administratif.",
-                        Priorite.MOYENNE, 2, 4, Statut.EN_COURS, 28, false, false),
-                new Seed("Imprimante reseau hors ligne",
-                        "L'imprimante du guichet 3 apparait hors ligne sur tous les postes.",
-                        Priorite.BASSE, 1, 5, Statut.RESOLU, 200, false, false),
-                new Seed("Windows Server 2019 ne demarre plus apres une coupure electrique",
-                        "Le serveur de fichiers reste bloque sur l'ecran de reparation automatique.",
-                        Priorite.HAUTE, 8, 3, Statut.EN_COURS, 10, true, false),
-                new Seed("Connexion VPN impossible pour les agents en teletravail",
-                        "Le client VPN affiche 'Authentification echouee' pour 5 agents depuis ce matin.",
-                        Priorite.MOYENNE, 3, 0, Statut.OUVERT, 5, false, false),
-                new Seed("Boite aux lettres Outlook pleine",
-                        "Plusieurs enseignants n'ont plus la place de recevoir des emails (quota de 50 Go atteint).",
-                        Priorite.BASSE, 1, 2, Statut.RESOLU, 300, false, false),
-                new Seed("Sauvegarde MySQL nocturne en echec",
-                        "Le script de sauvegarde de la base MySQL echoue depuis deux nuits (disque plein).",
-                        Priorite.MOYENNE, 4, 5, Statut.OUVERT, 26, false, false),
-                new Seed("Lenteur du Wi-Fi dans les salles de classe",
-                        "Le reseau Wi-Fi sature aux heures de cours : debit inferieur a 1 Mbit/s.",
-                        Priorite.MOYENNE, 3, 2, Statut.EN_COURS, 72, false, false),
-                new Seed("Certificat SSL expire sur le portail patient",
-                        "Le navigateur affiche 'Votre connexion n'est pas privee' sur le portail des patients.",
-                        Priorite.HAUTE, 2, 1, Statut.RESOLU, 90, false, true),
-                new Seed("Poste de caisse bloque par Windows Update",
-                        "Le poste de caisse 2 redemarre en boucle sur la mise a jour Windows.",
-                        Priorite.BASSE, 2, 3, Statut.OUVERT, 3, false, false),
-                new Seed("Antivirus desactive sur plusieurs postes",
-                        "La console antivirus signale 8 postes sans protection active dans plusieurs agences.",
-                        Priorite.MOYENNE, 2, 4, Statut.RESOLU, 150, false, false),
-                new Seed("Acces VPN refuse au service comptabilite",
-                        "Le service comptabilite ne peut plus joindre le serveur de fichiers via le VPN.",
-                        Priorite.HAUTE, 3, 5, Statut.EN_COURS, 60, false, false));
+        List<Seed> seeds = SEEDS;
 
         int i = 0;
         for (Seed s : seeds) {
@@ -190,6 +193,34 @@ public class DataLoader implements CommandLineRunner {
         }
         backfillIncidents();
         System.out.println(">>> ITCare : jeu d'essai charge (3 utilisateurs, 6 clients reels, 15 incidents)");
+    }
+
+    /**
+     * Sur un hebergement dont le disque est efface a chaque redemarrage (ex. Render gratuit), la base
+     * (MySQL externe) conserve les noms de fichiers mais les fichiers disparaissent. On regenere ici ceux
+     * du jeu d'essai (logos, captures, rapports) sous le MEME nom. Les fichiers ajoutes par les utilisateurs
+     * ne peuvent pas etre restaures.
+     */
+    private void restoreMissingDemoFiles() {
+        for (Client c : clientRepository.findAll()) {
+            if (c.getPhoto() == null || storage.exists(FileType.LOGO, c.getPhoto())) {
+                continue;
+            }
+            CLIENTS.stream().filter(d -> d.nom().equals(c.getNom())).findFirst()
+                    .ifPresent(d -> storage.writeBytes(FileType.LOGO, c.getPhoto(), loadLogo(d.logo())));
+        }
+        for (Incident inc : incidentRepository.findAll()) {
+            Seed seed = SEEDS.stream().filter(s -> s.libelle().equals(inc.getLibelle())).findFirst().orElse(null);
+            if (seed == null) {
+                continue;
+            }
+            if (inc.getCaptureEcran() != null && !storage.exists(FileType.CAPTURE, inc.getCaptureEcran())) {
+                storage.writeBytes(FileType.CAPTURE, inc.getCaptureEcran(), captureEcran(seed.libelle()));
+            }
+            if (inc.getRapportPdf() != null && !storage.exists(FileType.RAPPORT, inc.getRapportPdf())) {
+                storage.writeBytes(FileType.RAPPORT, inc.getRapportPdf(), rapportPdf(seed));
+            }
+        }
     }
 
     private Role ensureRole(RoleName name) {
